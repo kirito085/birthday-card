@@ -21,6 +21,7 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
@@ -64,12 +65,26 @@
 
     .wrap{ max-width: 980px; margin: 0 auto; padding: 36px 18px 64px; position:relative; z-index:2; }
     .glass{
+      position:relative;
       background: linear-gradient(180deg, var(--card), transparent 160%);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+    .glass::before{
+      content:"";
+      position:absolute; inset:-1px;
+      border-radius: inherit;
+      padding:1px;
+      background: linear-gradient(90deg, rgba(255,119,183,.35), rgba(124,107,255,.25), rgba(69,214,255,.22));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events:none;
+      opacity:.55;
     }
     .cover{ padding: 26px; position:relative; overflow:hidden; }
     .badge{
@@ -108,6 +123,8 @@
       user-select:none;
     }
     button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); }
+    button:active{ transform: translateY(0px) scale(.99); }
+    button:focus-visible{ outline: 2px solid rgba(69,214,255,.55); outline-offset: 2px; }
     .primary{
       background: linear-gradient(90deg, rgba(255,119,183,.95), rgba(124,107,255,.95), rgba(69,214,255,.9));
       border: 0; box-shadow: 0 10px 30px rgba(124,107,255,.18);
@@ -126,7 +143,8 @@
 
     .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
     @media (max-width: 820px){ .grid{grid-template-columns:1fr} }
-    .section{ padding: 18px; overflow:hidden; position:relative; }
+    .section{ padding: 18px; overflow:hidden; position:relative; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .section:hover{ transform: translateY(-2px); border-color: rgba(255,255,255,.22); background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 160%); }
     .section h2{ margin: 0 0 10px; font-size: 18px; letter-spacing: -.01em; }
     .section p{ margin: 0; color: var(--muted); line-height: 1.75; font-size: 14.5px; white-space: pre-wrap; }
 
@@ -135,6 +153,7 @@
       border: 1px solid var(--line);
       background: rgba(0,0,0,.18);
       min-height: 320px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
     }
     .slide{
       position:absolute; inset:0; opacity:0; transform: scale(1.02);
@@ -150,8 +169,9 @@
     .caption{
       position:absolute; left: 14px; right:14px; bottom: 12px;
       font-size: 13px; color: rgba(255,255,255,.88);
-      display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; z-index:2;
+      display:flex; align-items:flex-end; justify-content:flex-end; gap: 12px; z-index:2;
     }
+    #capText{ display:none; }
     .dots{ display:flex; gap:6px; align-items:center; }
     .dot2{ width:7px;height:7px;border-radius:999px; background: rgba(255,255,255,.35); border:1px solid rgba(255,255,255,.25); }
     .dot2.on{ background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3)); border:0; box-shadow: 0 0 16px rgba(255,119,183,.25); }
@@ -206,6 +226,65 @@
       animation-duration: 11s;
     }
     @keyframes float{ 0%,100%{ transform: translate(0,0) } 50%{ transform: translate(22px, 14px) } }
+
+    @keyframes fadeUp{ from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
+    .cover{ animation: fadeUp .55s ease both; }
+    .grid{ animation: fadeUp .55s ease .08s both; }
+    .footer{ animation: fadeUp .55s ease .16s both; }
+  
+    /* main content hidden until opened */
+    .main-content{ display:none; }
+    .main-content.revealed{ display:block; animation: fadeInUp .7s ease both; }
+    @keyframes fadeInUp{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* cleaner slideshow with click-to-zoom */
+    .slideshow{ min-height: auto; }
+    .slideImg{
+      width:100%;
+      height:320px;
+      display:block;
+      object-fit:cover;
+      transition: opacity .35s ease;
+      cursor: zoom-in;
+    }
+    @media (max-width: 500px){
+      .slideImg{ height: 280px; }
+    }
+    .caption--dots{
+      left: 14px; right:14px; bottom: 12px;
+      justify-content:flex-end;
+    }
+    .caption--dots > div:first-child{ display:none; } /* just in case */
+
+    /* compact cards for countdown/surprise */
+    .compact{ padding: 14px; }
+    .compact .divider{ display:none; }
+    .compact p{ font-size:14px; }
+
+    /* lightbox modal */
+    .lightbox-img{
+      width:100%;
+      max-height: 74vh;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+    }
+    .lb-actions{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .lb-actions .btn{
+      flex:1 1 140px;
+      text-align:center;
+    }
+
   </style>
 </head>
 
@@ -228,8 +307,8 @@
           <h1>Happy Birthday, <span class="gradient" id="herName">肥婆</span> 💝</h1>
 
           <div class="subtitle" id="subtitle">
-            认识你五年了，还是觉得你挺厉害的。
-            这页不讲大道理：今天你最大，开心就行。
+            生日快乐大肥猪。
+            今天不讲大道理：吃好、睡好、开开心心、也希望你能顺利拿到签名。
           </div>
 
           <div class="actions">
@@ -274,69 +353,54 @@
       </div>
     </div>
 
+    <div id="mainContent" class="main-content">
     <div class="grid">
       <div class="glass section">
         <h2>💌 给肥婆的一封信</h2>
         <p id="letter">
 肥婆：
 
-生日快乐。
-认识你五年了，你还是你——有时候很可爱，有时候很难搞，但总体来说很值得。
+生日快乐，22岁了，也是到了跟我一样的年纪了。
+认识你五年还是六年了，你还是你——有时候很可爱，有时候很难搞，更多时候有点蠢，但总体来说很值得跟你在一起的。
 
-今年我不许你太累，也不许你乱委屈自己。
-想吃就吃，想睡就睡，想发脾气也行（但要对我留点情面）。
+今年我希望你别太累，也不要太闲了。希望你在墨尔本读研顺利，也希望我们的异地别再继续了
+想吃就吃，想睡就睡，想发脾气也行，但也要注意减肥。
 
-总之今天你最大。
+总之今天你最大，肥婆大王。
         </p>
         <div class="divider"></div>
-        <p style="color:rgba(255,255,255,.85); font-weight:700">— <span id="signature">我</span></p>
+        <p style="color:rgba(255,255,255,.85); font-weight:700">— <span id="signature">帅哥</span></p>
       </div>
 
       <div class="glass section">
-        <h2>📸 我们的回忆1</h2>
+        <h2>📸 我们的回忆</h2>
 
         <div class="slideshow" id="slideshow">
-          <div class="slide active" id="s0"></div>
-          <div class="slide" id="s1"></div>
-          <div class="slide" id="s2"></div>
-          <div class="slide" id="s3"></div>
-
-          <div class="caption">
-            <div id="capText">回忆库存（持续更新）</div>
+          <img id="slideImg" class="slideImg" src="" alt="memory photo">
+          <div class="caption caption--dots">
+            <div></div>
             <div class="dots" id="dots"></div>
           </div>
         </div>
 
         <div class="divider"></div>
-        <p style="font-size:13px">
-          把照片放到 <b>photos/</b> 文件夹里（1.jpg, 2.jpg...），就会自动轮播。
-        </p>
       </div>
 
-      <div class="glass section">
+      <div class="glass section compact">
         <h2>⏳ 倒计时</h2>
         <p id="countdownText">正在计算...</p>
-        <div class="divider"></div>
-        <p style="font-size:13px">
-          这个倒计时只用“月/日”，不用出生年份，不会露馅也不会尴尬。
-        </p>
       </div>
 
-      <div class="glass section">
+      <div class="glass section compact">
         <h2>🎁 隐藏惊喜</h2>
-        <p>
-点「点我有惊喜」会撒花 🎉  
-然后弹出一句我藏起来的话。
-        </p>
+        <p>点一下上面的「点我有惊喜」。</p>
         <div class="divider"></div>
-        <p style="font-size:13px">
-          你也可以把惊喜改成你们的专属梗/暗号。
-        </p>
       </div>
     </div>
 
     <div class="footer glass">
-      Made with ❤️ — 只给肥婆看的网页
+      Made with ❤️ 
+    </div>
     </div>
   </div>
 
@@ -345,20 +409,31 @@
       <button class="close" id="closeModal">✕</button>
       <h2>🌟 Surprise</h2>
       <div class="big" id="surpriseText">
-给你一个不肉麻但很认真的版本：
 
-未来不保证一直顺利，
-但我保证：你需要的时候，我都在。
-
+骗你的其实什么都没有
 生日快乐，肥婆。
       </div>
       <div style="margin-top:14px; color:var(--muted); font-size:13px;">
-        （提示：这个网页是私藏款）
+        
       </div>
     </div>
   </div>
 
-  <div class="confetti" id="confetti"></div>
+  
+  <!-- lightbox -->
+  <div class="modal" id="lightbox">
+    <div class="box">
+      <button class="close" id="closeLightbox">✕</button>
+      <h2 style="margin-bottom:12px;">📸</h2>
+      <img id="lightboxImg" class="lightbox-img" src="" alt="photo">
+      <div class="lb-actions">
+        <button class="btn" id="prevPhoto">← 上一张</button>
+        <button class="btn" id="nextPhoto">下一张 →</button>
+      </div>
+    </div>
+  </div>
+
+<div class="confetti" id="confetti"></div>
 
   <!-- optional bgm -->
   <audio id="bgm" loop preload="auto">
@@ -375,10 +450,13 @@
       yearsKnown: 5,
       showHappyOnBirthday: true,
       photos: [
-        { src: "photos/1.jpg", cap: "第一张：这张你很顶" },
-        { src: "photos/2.jpg", cap: "第二张：我们那天挺开心" },
-        { src: "photos/3.jpg", cap: "第三张：别问，问就是收藏" },
-        { src: "photos/4.jpg", cap: "第四张：以后也要有" }
+        { src: "photos/1.jpg" },
+        { src: "photos/2.jpg" },
+        { src: "photos/3.jpg" },
+        { src: "photos/4.jpg" },
+        { src: "photos/5.jpg" },
+        { src: "photos/6.jpg" },
+        { src: "photos/7.jpg" }
       ],
       slideIntervalMs: 3800
     };
@@ -432,21 +510,33 @@
     tick();
     setInterval(tick, 1000 * 20);
 
-    // slideshow
-    const slides = [ $("s0"), $("s1"), $("s2"), $("s3") ];
+    // slideshow (7 photos) + click to zoom
     const dotsWrap = $("dots");
+    const slideImg = $("slideImg");
     let idx = 0;
+    let sliding = false;
 
     function setSlide(i){
-      idx = i % CONFIG.photos.length;
-      slides.forEach((el, k) => {
-        el.style.backgroundImage = `url('${CONFIG.photos[k].src}')`;
-        el.classList.toggle("active", k === idx);
-      });
-      $("capText").textContent = CONFIG.photos[idx].cap || "回忆库存";
+      if (sliding) return;
+      sliding = true;
+      idx = ((i % CONFIG.photos.length) + CONFIG.photos.length) % CONFIG.photos.length;
+
+      // fade out
+      slideImg.style.opacity = "0";
+      setTimeout(() => {
+        slideImg.src = CONFIG.photos[idx].src;
+        slideImg.onload = () => {
+          slideImg.style.opacity = "1";
+          sliding = false;
+        };
+        // fallback if cached and onload doesn't fire reliably
+        setTimeout(() => { slideImg.style.opacity = "1"; sliding = false; }, 250);
+      }, 180);
+
       [...dotsWrap.children].forEach((d, k) => d.classList.toggle("on", k === idx));
     }
 
+    // dots
     dotsWrap.innerHTML = "";
     CONFIG.photos.forEach((_, k) => {
       const d = document.createElement("div");
@@ -456,14 +546,25 @@
       dotsWrap.appendChild(d);
     });
 
-    slides.forEach((el, k) => el.style.backgroundImage = `url('${CONFIG.photos[k].src}')`);
-    setSlide(0);
-    setInterval(() => setSlide((idx + 1) % CONFIG.photos.length), CONFIG.slideIntervalMs);
+    // init
+    slideImg.src = CONFIG.photos[0].src;
+    slideImg.style.opacity = "1";
+    setInterval(() => setSlide(idx + 1), CONFIG.slideIntervalMs);
+
+    // lightbox open on click
+    slideImg.addEventListener("click", () => openLightbox(idx));
 
     // buttons / modal
     const modal = $("modal");
     $("openCardBtn").addEventListener("click", () => {
-      document.querySelector(".grid").scrollIntoView({behavior:"smooth", block:"start"});
+      const main = document.getElementById("mainContent");
+      if (main && !main.classList.contains("revealed")) {
+        main.classList.add("revealed");
+        popConfetti(60);
+        setTimeout(() => document.querySelector(".grid").scrollIntoView({behavior:"smooth", block:"start"}), 250);
+      } else {
+        document.querySelector(".grid").scrollIntoView({behavior:"smooth", block:"start"});
+      }
     });
     $("surpriseBtn").addEventListener("click", () => {
       popConfetti(140);
@@ -491,7 +592,30 @@
       }
     });
 
-    // confetti
+    
+    // lightbox
+    const lb = $("lightbox");
+    const lbImg = $("lightboxImg");
+    $("closeLightbox").addEventListener("click", () => lb.classList.remove("on"));
+    lb.addEventListener("click", (e) => { if (e.target === lb) lb.classList.remove("on"); });
+
+    function openLightbox(i){
+      idx = i;
+      lbImg.src = CONFIG.photos[idx].src;
+      lb.classList.add("on");
+    }
+    $("prevPhoto").addEventListener("click", () => {
+      idx = (idx - 1 + CONFIG.photos.length) % CONFIG.photos.length;
+      lbImg.src = CONFIG.photos[idx].src;
+      setSlide(idx);
+    });
+    $("nextPhoto").addEventListener("click", () => {
+      idx = (idx + 1) % CONFIG.photos.length;
+      lbImg.src = CONFIG.photos[idx].src;
+      setSlide(idx);
+    });
+
+// confetti
     function rand(min,max){ return Math.random()*(max-min)+min; }
     function popConfetti(count=120){
       const root = $("confetti");
