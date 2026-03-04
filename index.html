@@ -444,7 +444,7 @@
     // ====== 配置区（已按你信息写好）======
     const CONFIG = {
       herName: "肥婆",
-      signature: "我",
+      signature: "帅哥",
       birthdayMonth: 3,
       birthdayDay: 5,
       yearsKnown: 5,
@@ -500,11 +500,11 @@
       if (CONFIG.showHappyOnBirthday && isBirthdayToday()) {
         $("countdown").textContent = "今天 🎂";
         $("countdownText").textContent =
-          `今天就是 3/5。\n你别忙了，去开心。\n（我说的。）`;
+          `今天就是 3/5。\n要开心快乐。\n（嘿嘿）`;
       } else {
         $("countdown").textContent = `${cd} 天`;
         $("countdownText").textContent =
-          `距离 3/5 还有 ${cd} 天。\n我负责提醒你：该放松就放松。`;
+          `距离 3/5 还有 ${cd} 天。\n提醒一下你：该放松就放松。`;
       }
     }
     tick();
